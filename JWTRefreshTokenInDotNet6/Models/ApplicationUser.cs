@@ -10,5 +10,7 @@ namespace JWTRefreshTokenInDotNet6.Models
 
         [MaxLength(50)]
         public string LastName { get; set; }
+
+        public List<RefreshToken>? RefreshTokens { get; set; }
     }
 }
