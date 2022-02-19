@@ -60,7 +60,7 @@ namespace JWTRefreshTokenInDotNet6.Services
             return new AuthModel
             {
                 Email = user.Email,
-                //ExpiresOn = jwtSecurityToken.ValidTo,
+                ExpiresOn = jwtSecurityToken.ValidTo,
                 IsAuthenticated = true,
                 Roles = new List<string> { "User" },
                 Token = new JwtSecurityTokenHandler().WriteToken(jwtSecurityToken),
@@ -87,7 +87,7 @@ namespace JWTRefreshTokenInDotNet6.Services
             authModel.Token = new JwtSecurityTokenHandler().WriteToken(jwtSecurityToken);
             authModel.Email = user.Email;
             authModel.Username = user.UserName;
-            //authModel.ExpiresOn = jwtSecurityToken.ValidTo;
+            authModel.ExpiresOn = jwtSecurityToken.ValidTo;
             authModel.Roles = rolesList.ToList();
 
             if(user.RefreshTokens.Any(t => t.IsActive))
@@ -192,6 +192,25 @@ namespace JWTRefreshTokenInDotNet6.Services
             authModel.RefreshTokenExpiration = newRefreshToken.ExpiresOn; 
 
             return authModel;
+        }
+
+        public async Task<bool> RevokeTokenAsync(string token)
+        {
+            var user = await _userManager.Users.SingleOrDefaultAsync(u => u.RefreshTokens.Any(t => t.Token == token));
+
+            if (user == null)
+                return false;
+
+            var refreshToken = user.RefreshTokens.Single(t => t.Token == token);
+
+            if (!refreshToken.IsActive)
+                return false;
+
+            refreshToken.RevokedOn = DateTime.UtcNow;
+
+            await _userManager.UpdateAsync(user);
+
+            return true;
         }
 
         private RefreshToken GenerateRefreshToken()
