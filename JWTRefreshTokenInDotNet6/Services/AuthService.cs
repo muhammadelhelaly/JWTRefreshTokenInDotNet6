@@ -57,6 +57,10 @@ namespace JWTRefreshTokenInDotNet6.Services
 
             var jwtSecurityToken = await CreateJwtToken(user);
 
+            var refreshToken = GenerateRefreshToken();
+            user.RefreshTokens?.Add(refreshToken);
+            await _userManager.UpdateAsync(user);
+
             return new AuthModel
             {
                 Email = user.Email,
@@ -64,7 +68,9 @@ namespace JWTRefreshTokenInDotNet6.Services
                 IsAuthenticated = true,
                 Roles = new List<string> { "User" },
                 Token = new JwtSecurityTokenHandler().WriteToken(jwtSecurityToken),
-                Username = user.UserName
+                Username = user.UserName,
+                RefreshToken = refreshToken.Token,
+                RefreshTokenExpiration = refreshToken.ExpiresOn
             };
         }
 
