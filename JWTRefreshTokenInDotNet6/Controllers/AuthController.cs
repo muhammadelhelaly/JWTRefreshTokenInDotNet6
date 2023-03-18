@@ -95,8 +95,11 @@ namespace JWTRefreshTokenInDotNet6.Controllers
         {
             var cookieOptions = new CookieOptions
             {
-                HttpOnly = true,
-                Expires = expires.ToLocalTime()
+                 HttpOnly = true,
+                Expires = expires.ToLocalTime(),
+                Secure = true,
+                IsEssential = true,
+                SameSite = SameSiteMode.None
             };
 
             Response.Cookies.Append("refreshToken", refreshToken, cookieOptions);
